@@ -112,6 +112,13 @@ async def on_ready():
     if not weekly_draw_loop.is_running():
         weekly_draw_loop.start()
 
+# ---------------------------------------------------------------------------
+# Commande !help
+# ---------------------------------------------------------------------------
+
+@bot.command(name="helps")
+async def helps_command(ctx: commands.Context, *, titre: str = None):
+    await ctx.send("Il existe plusieurs commandes: \n - !film 'Nom du film': Ajoute le premier film trouvé dans la base de film de OMDB au tirage \n - !removefilm 'Nom du film': Enleve le film si le nom exacte se trouve dans le tirage et que tu es à l'origine de l'ajout")
 
 # ---------------------------------------------------------------------------
 # Commande !film
