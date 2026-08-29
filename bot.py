@@ -148,8 +148,7 @@ async def film_command(ctx: commands.Context, *, titre: str = None):
         "added_by_name": str(ctx.author),
         "added_at": datetime.now(PARIS_TZ).isoformat(),
     }
-    films.append(entry)
-    save_films(films)
+    
 
     embed = discord.Embed(
         title=f"🎬 {movie['title']} ({movie['year']})",
@@ -160,7 +159,12 @@ async def film_command(ctx: commands.Context, *, titre: str = None):
         embed.set_image(url=movie["poster"])
     embed.set_footer(text="Film ajouté au tirage de vendredi !")
 
-    await ctx.send(embed=embed)
+    try:
+        await ctx.send(embed=embed)
+        films.append(entry)
+        save_films(films)
+    except:
+        await ctx.send("Permission refusée le film n'est pas ajouté")
 
 
 # ---------------------------------------------------------------------------
