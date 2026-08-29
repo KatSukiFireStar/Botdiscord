@@ -118,7 +118,40 @@ async def on_ready():
 
 @bot.command(name="helps")
 async def helps_command(ctx: commands.Context, *, titre: str = None):
-    await ctx.send("Il existe plusieurs commandes: \n - !film 'Nom du film': Ajoute le premier film trouvé dans la base de film de OMDB au tirage \n - !removefilm 'Nom du film': Enleve le film si le nom exacte se trouve dans le tirage et que tu es à l'origine de l'ajout")
+    await ctx.send("Il existe plusieurs commandes: " +
+                    "\n - !film 'Nom du film': Ajoute le premier film trouvé dans la base de film de OMDB au tirage"+
+                    "\n - !removefilm 'Nom du film': Enleve le film si le nom exacte se trouve dans le tirage et que tu es à l'origine de l'ajout"+
+                    "\n - !affichefilms: Affiche les films présent pour le prochain tirage")
+
+# ---------------------------------------------------------------------------
+# Commande !affichefilm
+# ---------------------------------------------------------------------------
+
+@bot.command(name="affichefilms")
+async def affichefilms_command(ctx: commands.Context, *, titre: str = None):
+    films = load_films()
+
+    nb = 0
+    for film in films:
+        nb += 1
+
+    if nb == 0:
+        await ctx.send("Il n'y a pas encore de film dans la liste pour le prochain tirage.")
+        return
+    
+    await ctx.send("Il y a " + str(nb) + " films ajouté pour le prochain tirage. Voici les films déjà ajouter.")
+
+    for film in films:
+        embed = discord.Embed(
+            title=f"🎬 {film['title']} ({film['year']})",
+            description=f"Ajouté à la liste par **{ctx.author.mention}**",
+            color=discord.Color.green(),
+        )
+        if film["poster"] and film["poster"] != "N/A":
+            embed.set_image(url=film["poster"])
+        
+
+        await ctx.send(embed=embed)
 
 # ---------------------------------------------------------------------------
 # Commande !film
