@@ -1,0 +1,41 @@
+name: Discord Film Bot
+
+# Se déclenche manuellement (bouton "Run workflow") ou automatiquement
+# à chaque push sur la branche main.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  run-bot:
+    # IMPORTANT : ce job doit tourner sur un runner auto-hébergé
+    # (une machine que tu contrôles et qui reste allumée), pas sur un
+    # runner GitHub classique (ubuntu-latest, etc.) qui est limité à
+    # 6h d'exécution et n'est pas fait pour un service continu.
+    runs-on: self-hosted
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Lancer le bot (avec redémarrage automatique en cas de crash)
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
+          DRAW_CHANNEL_ID: ${{ secrets.DRAW_CHANNEL_ID }}
+        run: |
+          while true; do
+            echo "Démarrage du bot..."
+            python bot.py
+            echo "Le bot s'est arrêté (crash ou déconnexion). Redémarrage dans 10s..."
+            sleep 10
+          done
