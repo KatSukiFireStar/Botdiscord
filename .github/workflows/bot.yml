@@ -19,23 +19,33 @@ jobs:
       - name: Récupérer le code
         uses: actions/checkout@v4
 
-      - name: Installer Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11.7"
-
-      - name: Installer les dépendances
-        run: pip install -r requirements.txt
-
+      - name: Vérifier / installer Python sur la machine
+        run: |
+          if ! command -v python3 &> /dev/null; then
+            echo "Python3 introuvable, installation via apt..."
+            sudo apt-get update
+            sudo apt-get install -y python3 python3-venv python3-pip
+          fi
+          python3 --version
+ 
+      - name: Créer un environnement virtuel et installer les dépendances
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+ 
       - name: Lancer le bot (avec redémarrage automatique en cas de crash)
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
           DRAW_CHANNEL_ID: ${{ secrets.DRAW_CHANNEL_ID }}
         run: |
+          source venv/bin/activate
           while true; do
             echo "Démarrage du bot..."
             python bot.py
             echo "Le bot s'est arrêté (crash ou déconnexion). Redémarrage dans 10s..."
             sleep 10
           done
+
