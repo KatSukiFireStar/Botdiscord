@@ -40,7 +40,11 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-OMDB_API_KEY = os.getenv("OMDB_API_KEY")
+
+TMDB_API_KEY = os.getenv("TMDB_API_KEY")   # remplace OMDB_API_KEY
+TMDB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
+TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
+
 # ID du salon dans lequel le tirage hebdomadaire sera annoncé.
 DRAW_CHANNEL_ID = os.getenv("DRAW_CHANNEL_ID")
 
@@ -82,22 +86,26 @@ def save_films(films: list[dict]) -> None:
 # ---------------------------------------------------------------------------
 
 async def search_movie(title: str) -> dict | None:
-    """Cherche un film par titre sur OMDb. Retourne un dict ou None."""
-    if not OMDB_API_KEY:
-        raise RuntimeError("OMDB_API_KEY n'est pas configurée.")
+    """Cherche un film par titre sur TMDb (résultats en français). Retourne un dict ou None."""
+    if not TMDB_API_KEY:
+        raise RuntimeError("TMDB_API_KEY n'est pas configurée.")
 
-    params = {"apikey": OMDB_API_KEY, "t": title, "type": "movie"}
+    headers = {"Authorization": f"Bearer {TMDB_API_KEY}"}
+    params = {"query": title, "language": "fr-FR", "include_adult": "false"}
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(OMDB_URL, params=params) as resp:
+        async with session.get(TMDB_SEARCH_URL, headers=headers, params=params) as resp:
             data = await resp.json()
 
-    if data.get("Response") == "True":
+    results = data.get("results") or []
+    if results:
+        movie = results[0]  # premier résultat = meilleure correspondance
+        poster_path = movie.get("poster_path")
         return {
-            "title": data.get("Title"),
-            "year": data.get("Year"),
-            "poster": data.get("Poster"),
-            "imdb_id": data.get("imdbID"),
+            "title": movie.get("title"),
+            "year": (movie.get("release_date") or "")[:4] or "N/A",
+            "poster": f"{TMDB_IMAGE_BASE_URL}{poster_path}" if poster_path else None,
+            "imdb_id": movie.get("id"),  # id TMDb (pas un identifiant IMDb)
         }
     return None
 
