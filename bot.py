@@ -3,7 +3,7 @@ Bot Discord - Gestion de suggestions de films
 ================================================
 
 Commandes :
-  !film <nom du film>      -> Cherche le film via l'API OMDb, l'ajoute à la
+  !film <nom du film>      -> Cherche le film via l'API TMDB, l'ajoute à la
                                liste s'il existe et envoie l'affiche.
   !removefilm <nom du film>-> Retire le film de la liste, uniquement si
                                c'est la personne qui l'a ajouté.
@@ -41,7 +41,7 @@ except ImportError:
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
-TMDB_API_KEY = os.getenv("TMDB_API_KEY")   # remplace OMDB_API_KEY
+TMDB_API_KEY = os.getenv("TMDB_API_KEY") 
 TMDB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
 TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
 
@@ -51,7 +51,7 @@ DRAW_CHANNEL_ID = os.getenv("DRAW_CHANNEL_ID")
 DATA_FILE = "films.json"
 PARIS_TZ = pytz.timezone("Europe/Paris")
 
-OMDB_URL = "https://www.omdbapi.com/"
+
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("film-bot")
@@ -82,7 +82,7 @@ def save_films(films: list[dict]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Appel à l'API OMDb
+# Appel à l'API TMDB
 # ---------------------------------------------------------------------------
 
 async def search_movie(title: str) -> dict | None:
@@ -127,7 +127,7 @@ async def on_ready():
 @bot.command(name="helps")
 async def helps_command(ctx: commands.Context, *, titre: str = None):
     await ctx.send("Il existe plusieurs commandes: " +
-                    "\n - !film 'Nom du film': Ajoute le premier film trouvé dans la base de film de OMDB au tirage"+
+                    "\n - !film 'Nom du film': Ajoute le premier film trouvé dans la base de film de TMDB au tirage"+
                     "\n - !removefilm 'Nom du film': Enleve le film si le nom exacte se trouve dans le tirage et que tu es à l'origine de l'ajout"+
                     "\n - !affichefilms: Affiche les films présent pour le prochain tirage")
 
@@ -324,6 +324,6 @@ async def force_draw_command(ctx: commands.Context):
 if __name__ == "__main__":
     if not DISCORD_TOKEN:
         raise SystemExit("❌ La variable d'environnement DISCORD_TOKEN est manquante.")
-    if not OMDB_API_KEY:
-        raise SystemExit("❌ La variable d'environnement OMDB_API_KEY est manquante.")
+    if not TMDB_API_KEY:
+        raise SystemExit("❌ La variable d'environnement TMDB_API_KEY est manquante.")
     bot.run(DISCORD_TOKEN)
